@@ -1,0 +1,18 @@
+name: Generate Dist Folder
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - run: npm run build
+      - name: Upload Finished Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-ready-project
+          path: dist/
