@@ -7,48 +7,101 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script> 
     <style>
-        body { background-color: #0f172a; color: white; font-family: sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .watermark-text { color: rgba(220, 38, 38, 0.4); font-size: 2rem; font-weight: bold; transform: rotate(-20deg); pointer-events: none; user-select: none; }
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .watermark-text { 
+            color: rgba(220, 38, 38, 0.3); 
+            font-size: 1.5rem; 
+            font-weight: bold; 
+            transform: rotate(-15deg); 
+            white-space: nowrap;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <header class="text-center mb-10">
+    <header class="text-center mb-8">
         <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">AI Render Pro</h1>
-        <p class="text-gray-400 font-medium text-sm">www.avantgardbuildings.com</p>
+        <p class="text-gray-400 text-sm tracking-widest">www.avantgardbuildings.com</p>
     </header>
 
-    <main class="glass p-8 rounded-3xl w-full max-w-2xl shadow-2xl relative">
-        <div class="relative border-2 border-dashed border-gray-600 rounded-2xl h-80 flex items-center justify-center overflow-hidden bg-slate-900/50 mb-6" id="display-area">
-            <p class="text-gray-500 z-0">قم برفع صورة لبدء المعالجة</p>
+    <main class="glass p-6 md:p-10 rounded-[2.5rem] w-full max-w-2xl shadow-2xl relative">
+        
+        <div id="drop-zone" class="relative border-2 border-dashed border-gray-600 rounded-2xl h-72 flex flex-col items-center justify-center overflow-hidden bg-slate-900/40 mb-6 transition-all hover:border-blue-500 group cursor-pointer">
+            <input type="file" id="file-input" class="hidden" accept="image/*">
             
+            <div id="upload-ui" class="text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-500 group-hover:text-blue-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <button class="bg-blue-600/20 text-blue-400 px-4 py-2 rounded-lg text-sm font-bold border border-blue-500/30 hover:bg-blue-600 hover:text-white transition-all">إضافة صورة</button>
+                <p class="text-gray-500 text-xs mt-2">أو اسحب الصورة وأفلتها هنا</p>
+            </div>
+
             <div id="watermark-layer" class="absolute inset-0 flex items-center justify-center z-10 hidden">
                 <span class="watermark-text">www.avantgardbuildings.com</span>
             </div>
+            
+            <img id="preview-img" class="absolute inset-0 w-full h-full object-contain hidden z-0">
         </div>
 
-        <div id="payment-box" class="bg-blue-900/30 border border-blue-500/30 rounded-xl p-6 text-center mb-6">
-            <p class="text-sm mb-4 text-blue-200">لإزالة العلامة المائية والحصول على الجودة العالية:</p>
+        <div class="bg-blue-900/20 border border-blue-500/20 rounded-2xl p-6 text-center mb-6">
+            <p class="text-xs mb-4 text-blue-200">لإزالة العلامة المائية والحصول على الجودة العالية:</p>
             <div id="paypal-button-container"></div>
         </div>
 
-        <button class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-xl font-bold transition-all shadow-lg active:scale-95">
-            ابدأ المعالجة المجانية
+        <button id="start-render" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-900/20 transition-all active:scale-95 flex items-center justify-center gap-2">
+            <span>ابدأ المعالجة المجانية</span>
         </button>
     </main>
 
     <script>
-        // إظهار العلامة المائية كنموذج عند التحميل
-        document.getElementById('watermark-layer').classList.remove('hidden');
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const previewImg = document.getElementById('preview-img');
+        const uploadUi = document.getElementById('upload-ui');
+        const watermark = document.getElementById('watermark-layer');
+        const renderBtn = document.getElementById('start-render');
 
+        // تفعيل زر الرفع
+        dropZone.onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImg.src = event.target.result;
+                    previewImg.classList.remove('hidden');
+                    uploadUi.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // تفعيل زر المعالجة الأزرق
+        renderBtn.onclick = () => {
+            if (previewImg.classList.contains('hidden')) {
+                alert("من فضلك ارفع صورة أولاً");
+                return;
+            }
+            renderBtn.innerHTML = "جاري المعالجة... ⏳";
+            renderBtn.disabled = true;
+            
+            setTimeout(() => {
+                watermark.classList.remove('hidden'); // إظهار العلامة المائية
+                renderBtn.innerHTML = "تمت المعالجة (بالعلامة المائية)";
+                renderBtn.classList.replace('bg-blue-600', 'bg-green-600');
+            }, 2000);
+        };
+
+        // نظام PayPal
         paypal.Buttons({
-            createOrder: (data, actions) => actions.order.create({ purchase_units: [{ amount: { value: '9.99' } }] }),
-            onApprove: (data, actions) => actions.order.capture().then(details => {
-                alert('تم الدفع بنجاح! جاري إزالة العلامة المائية...');
-                document.getElementById('watermark-layer').classList.add('hidden');
-                document.getElementById('payment-box').innerHTML = "<p class='text-green-400 font-bold'>✓ تم تفعيل النسخة الاحترافية</p>";
-            })
+            onApprove: (data, actions) => {
+                return actions.order.capture().then(details => {
+                    watermark.classList.add('hidden'); // إزالة العلامة المائية بعد الدفع
+                    alert('تم الدفع بنجاح! تم تنظيف الصورة من العلامة المائية.');
+                });
+            }
         }).render('#paypal-button-container');
     </script>
 </body>
