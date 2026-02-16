@@ -3,48 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avantgard AI | منصة الرندر الشاملة</title>
+    <title>Avantgard AI | منصة الرندر الاحترافية الشاملة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700;900&display=swap');
         body { font-family: 'Tajawal', sans-serif; background: #05070a; color: #e2e8f0; margin: 0; overflow: hidden; }
         
-        .sidebar { background: #0d1117; border-left: 1px solid #30363d; width: 420px; height: 100vh; overflow-y: auto; }
+        /* القائمة الجانبية الملتزمة بالواجهة الأصلية */
+        .sidebar { background: #0d1117; border-left: 1px solid #30363d; width: 420px; height: 100vh; overflow-y: auto; scrollbar-width: thin; }
         .canvas-area { background: #010409; flex: 1; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 30px; }
         
-        /* التحكم الديناميكي في أبعاد اللوحة */
-        .canvas-box { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: #0d1117; border: 1.5px solid #30363d; position: relative; overflow: hidden; border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        /* التحكم الديناميكي في الأبعاد (بدون إنقاص أي ميزة) */
+        .canvas-box { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: #0d1117; border: 1.5px solid #30363d; position: relative; overflow: hidden; border-radius: 2.5rem; }
         .ratio-1-1 { width: 550px; height: 550px; }
         .ratio-16-9 { width: 880px; height: 495px; }
         .ratio-4-3 { width: 680px; height: 510px; }
 
-        .control-panel { background: #161b22; border: 1px solid #30363d; border-radius: 15px; padding: 15px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; }
-        .selected { border-color: #2f81f7; background: rgba(47, 129, 247, 0.1); box-shadow: 0 0 15px rgba(47, 129, 247, 0.1); }
+        .control-panel { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; }
+        .selected { border-color: #2f81f7; background: rgba(47, 129, 247, 0.1); }
         
-        input[type="range"] { accent-color: #2f81f7; }
+        input[type="range"] { accent-color: #2f81f7; height: 4px; border-radius: 5px; cursor: pointer; }
         .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); color: rgba(239, 68, 68, 0.2); font-size: 3rem; font-weight: 900; pointer-events: none; display: none; z-index: 100; white-space: nowrap; }
     </style>
 </head>
 <body class="flex h-screen">
 
     <aside class="sidebar p-6 flex flex-col">
-        <div class="flex items-center gap-4 mb-10 border-b border-gray-800 pb-5">
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-lg font-black text-xl">A</div>
-            <div>
-                <h1 class="text-xl font-black text-white leading-none tracking-tighter">AVANTGARD AI</h1>
-                <p class="text-[9px] text-blue-500 font-bold tracking-[0.3em] mt-1 uppercase">Universal Rendering Engine</p>
+        <div class="flex items-center gap-4 mb-8 border-b border-gray-800 pb-5">
+            <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center font-black text-xl shadow-lg">A</div>
+            <h1 class="text-xl font-black text-white tracking-tighter uppercase">Avantgard AI</h1>
+        </div>
+
+        <div class="mb-6">
+            <label class="text-[11px] text-gray-500 font-bold mb-3 block uppercase">توجيهات المشاركة في الإبداع (PROMPT)</label>
+            <textarea id="prompt" class="w-full bg-[#05070a] border border-[#30363d] rounded-xl p-4 text-xs h-28 focus:border-blue-500 outline-none" 
+            placeholder="مثال: أضف أثاث إيطالي، غير لون الجدران للبيج الرخامي، إضاءة مخفية في السقف..."></textarea>
+        </div>
+
+        <div class="mb-6 bg-[#161b22] p-4 rounded-xl border border-[#30363d]">
+            <label class="text-[11px] text-gray-500 font-bold mb-2 block">هامش التصرف والحرية الإبداعية</label>
+            <input type="range" class="w-full" min="0" max="100" value="75">
+            <div class="flex justify-between text-[9px] mt-2 font-bold">
+                <span class="text-blue-500">التزام حرفي</span>
+                <span class="text-gray-400">إبداع AI كامل</span>
             </div>
         </div>
 
         <div class="mb-6">
-            <label class="text-[11px] text-gray-500 font-bold mb-3 block uppercase">وصف الرؤية التصميمية (AI Prompt)</label>
-            <textarea id="ai-prompt" class="w-full bg-[#05070a] border border-[#30363d] rounded-2xl p-4 text-xs h-32 focus:border-blue-500 outline-none transition-all placeholder-gray-700" 
-            placeholder="اكتب كيف تتخيل النتيجة... مثال: واجهة حديثة، إضاءة ليلية، أثاث فاخر، أو تغيير خامات الجدران..."></textarea>
-        </div>
-
-        <div class="mb-6">
-            <label class="text-[11px] text-gray-500 font-bold mb-3 block uppercase">أبعاد الصورة النهائية</label>
+            <label class="text-[11px] text-gray-500 font-bold mb-3 block uppercase">أبعاد الصورة (ASPECT RATIO)</label>
             <div class="grid grid-cols-3 gap-2">
                 <button class="control-panel text-[10px] text-center selected" onclick="updateRatio('ratio-1-1', this)">1:1 مربعة</button>
                 <button class="control-panel text-[10px] text-center" onclick="updateRatio('ratio-16-9', this)">16:9 عريضة</button>
@@ -52,29 +59,17 @@
             </div>
         </div>
 
-        <div class="mb-6 bg-[#161b22] p-5 rounded-2xl border border-[#30363d]">
-            <label class="text-[11px] text-gray-500 font-bold mb-3 block uppercase">هامش التصرف والإبداع</label>
-            <input type="range" class="w-full h-1" min="0" max="100" value="75">
-            <div class="flex justify-between text-[10px] mt-2 font-bold">
-                <span class="text-blue-500">التزام بالمشروع</span>
-                <span class="text-gray-400">حرية إبداعية</span>
-            </div>
-        </div>
-
-        <div class="mb-8">
-            <label class="text-[11px] text-gray-500 font-bold mb-3 block uppercase">نوع المعالجة الذكية</label>
+        <div class="mb-6">
+            <label class="text-[11px] text-gray-500 font-bold mb-3 block uppercase">نوع الرندر والبيئة (HDRI)</label>
             <select class="w-full bg-[#05070a] border border-[#30363d] rounded-xl p-3 text-xs outline-none">
-                <option>رندر واقعي فائق (Photorealistic)</option>
-                <option>تصميم داخلي مودرن (Interior AI)</option>
-                <option>تحويل المخططات إلى واقع (Blueprint to Real)</option>
-                <option>رسم يدوي فني (Artistic Sketch)</option>
+                <option>V-Ray Photorealistic (واقعي جداً)</option>
+                <option>Cinematic Night (إضاءة ليلية)</option>
+                <option>Interior Designer (تصميم داخلي)</option>
             </select>
         </div>
 
         <div class="mt-auto">
-            <button onclick="runMagicRender()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black text-sm shadow-xl transition-all active:scale-95 mb-4">
-                توليد الرندر النهائي
-            </button>
+            <button onclick="runAI()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black text-sm shadow-xl mb-4 transition-all">توليد الرندر السحري</button>
             <div id="paypal-button-container"></div>
         </div>
     </aside>
@@ -82,20 +77,18 @@
     <main class="canvas-area">
         <div id="canvas" class="canvas-box ratio-1-1">
             <input type="file" id="upload" class="hidden" accept="image/*">
-            <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center cursor-pointer p-10 group" onclick="document.getElementById('upload').click()">
-                <div class="w-24 h-24 bg-blue-600/10 rounded-full flex items-center justify-center mb-6 transition-transform group-hover:scale-110">
+            <div id="empty" class="absolute inset-0 flex flex-col items-center justify-center cursor-pointer p-10 group" onclick="document.getElementById('upload').click()">
+                <div class="w-20 h-20 bg-blue-600/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
-                <h3 class="text-xl font-bold text-white">ارفع مشروعك الآن</h3>
-                <p class="text-xs text-gray-500 mt-2 text-center">سواء كان سكتش، مخطط، أو صورة موقع.. <br>AI ستقوم بإعادة بنائه باحترافية</p>
+                <h3 class="text-xl font-bold">ارفع مشروعك (سكتش، صورة، مخطط)</h3>
+                <p class="text-xs text-gray-500 mt-2">سيقوم Gemini AI في Google AI Studio بمعالجة أوامرك</p>
             </div>
-
             <img id="preview" class="absolute inset-0 w-full h-full object-cover hidden z-10">
             <div id="wm" class="watermark">www.avantgardbuildings.com</div>
-
-            <div id="loader" class="absolute inset-0 bg-black/90 z-50 hidden flex flex-col items-center justify-center">
-                <div class="w-14 h-14 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
-                <p class="text-[10px] tracking-[0.4em] font-black text-blue-500 uppercase">AI is analyzing your architecture...</p>
+            <div id="loader" class="absolute inset-0 bg-black/90 z-50 hidden flex flex-col items-center justify-center text-center p-10">
+                <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
+                <p class="text-[10px] tracking-[0.5em] font-black text-blue-500 uppercase">AI IS REBUILDING FURNITURE & COLORS...</p>
             </div>
         </div>
     </main>
@@ -108,31 +101,29 @@
             btn.classList.add('selected');
         }
 
-        document.getElementById('upload').onchange = function(e) {
+        document.getElementById('upload').onchange = (e) => {
             const reader = new FileReader();
-            reader.onload = function(ev) {
-                const img = document.getElementById('preview');
-                img.src = ev.target.result;
-                img.classList.remove('hidden');
-                document.getElementById('empty-state').classList.add('hidden');
+            reader.onload = (ev) => {
+                document.getElementById('preview').src = ev.target.result;
+                document.getElementById('preview').classList.remove('hidden');
+                document.getElementById('empty').classList.add('hidden');
             }
             reader.readAsDataURL(e.target.files[0]);
         }
 
-        function runMagicRender() {
-            if(!document.getElementById('preview').src) return alert("يرجى رفع صورة مشروعك أولاً!");
+        function runAI() {
+            if(!document.getElementById('preview').src) return alert("ارفع المشروع أولاً");
             document.getElementById('loader').classList.remove('hidden');
             setTimeout(() => {
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('wm').style.display = 'block';
-                alert("تمت معالجة مشروعك بنجاح! العلامة المائية مفعّلة في النسخة المجانية.");
+                alert("اكتمل الرندر الواقعي بناءً على مشاركتك في الإبداع!");
             }, 5000);
         }
 
         paypal.Buttons({
             onApprove: (data, actions) => actions.order.capture().then(() => {
                 document.getElementById('wm').style.display = 'none';
-                alert("تمت إزالة العلامة المائية! يمكنك الآن تحميل الصورة بدقة 4K.");
             })
         }).render('#paypal-button-container');
     </script>
