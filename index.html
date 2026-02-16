@@ -3,161 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AVANTGARD AI | Professional Suite</title>
+    <title>Avantgard AI | Pro Studio Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background: #05070a; color: #d1d5db; margin: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700;900&display=swap');
+        body { font-family: 'Tajawal', sans-serif; background: #010409; color: #e2e8f0; margin: 0; overflow-x: hidden; }
         
-        /* تحسينات الأبعاد للجوال والكمبيوتر */
-        .canvas-container { transition: all 0.5s ease-in-out; position: relative; width: 100%; border-radius: 2rem; overflow: hidden; background: #0d1117; border: 2px solid #1f2937; }
-        .ratio-1-1 { aspect-ratio: 1 / 1; }
-        .ratio-16-9 { aspect-ratio: 16 / 9; }
-        .ratio-4-3 { aspect-ratio: 4 / 3; }
-
-        /* شاشة التحميل فوق المربع الثاني فقط */
-        #loader { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
+        /* الهيكل الأصلي الصارم */
+        .sidebar { background: #0d1117; border-left: 1px solid #30363d; width: 400px; height: 100vh; overflow-y: auto; position: sticky; top: 0; }
+        .main-canvas { flex: 1; padding: 40px; display: flex; flex-direction: column; gap: 30px; align-items: center; }
         
-        .active-tab { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.1) !important; color: white !important; }
+        /* صناديق الرندر الأصلية */
+        .render-frame { 
+            background: #05070a; 
+            border: 2px solid #30363d; 
+            border-radius: 24px; 
+            position: relative; 
+            overflow: hidden; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            max-width: 700px;
+        }
+        .ratio-1-1 { aspect-ratio: 1/1; }
+        .ratio-16-9 { aspect-ratio: 16/9; }
         
-        /* إخفاء السكرول بار */
-        ::-webkit-scrollbar { width: 0px; }
+        /* أزرار الخصائص (بدون قوائم فرعية) */
+        .opt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .btn-prop { 
+            background: #161b22; border: 1px solid #30363d; padding: 12px; border-radius: 12px; 
+            font-size: 11px; font-weight: bold; text-align: center; cursor: pointer; transition: 0.2s;
+        }
+        .btn-prop.active { border-color: #2f81f7; background: rgba(47, 129, 247, 0.1); color: #58a6ff; }
+        
+        .loader-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); color: rgba(255, 255, 255, 0.05); font-size: 3rem; font-weight: 900; pointer-events: none; text-transform: uppercase; white-space: nowrap; }
     </style>
 </head>
-<body class="flex flex-col lg:flex-row h-screen overflow-hidden">
+<body class="flex flex-col lg:flex-row">
 
-    <aside class="w-full lg:w-[400px] bg-[#0d1117] border-l border-gray-800 p-6 flex flex-col gap-6 overflow-y-auto h-auto lg:h-screen shadow-2xl z-20">
-        <div class="text-center border-b border-gray-800 pb-5">
-            <h1 class="text-2xl font-black text-white italic tracking-tighter">AVANTGARD AI</h1>
-            <p class="text-[9px] text-blue-500 font-bold tracking-[0.3em] uppercase mt-1">Universal Render Engine</p>
+    <aside class="sidebar p-8 flex flex-col gap-8 shadow-2xl">
+        <div class="text-center">
+            <h1 class="text-2xl font-black tracking-tighter text-white uppercase italic">AVANTGARD AI</h1>
+            <p class="text-[9px] text-blue-500 font-bold tracking-[0.4em]">PRO ARCHITECTURE SUITE</p>
         </div>
 
-        <div class="space-y-2">
-            <label class="text-[11px] font-bold text-gray-500 uppercase">🪄 أوامر التعديل الذكي (ما قبل الرندر)</label>
-            <textarea id="aiPrompt" class="w-full h-28 bg-[#05070a] border border-gray-800 rounded-2xl p-4 text-xs focus:border-blue-500 outline-none transition-all placeholder:text-gray-700 shadow-inner" 
-            placeholder="مثال: اجعل الأرضية خشبية، أضف إضاءة مخفية في السقف، غير الواجهة لمرمر..."></textarea>
+        <div class="space-y-3">
+            <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🪄 أوامر التعديل الذكي</label>
+            <textarea id="promptIn" class="w-full bg-[#010409] border border-[#30363d] rounded-xl p-4 text-xs h-28 focus:border-blue-500 outline-none" 
+            placeholder="مثال: أضف أثاثاً مكتبياً، جدران من الرخام، إضاءة مخفية..."></textarea>
         </div>
 
-        <div class="space-y-2">
-            <label class="text-[11px] font-bold text-gray-500 uppercase">وضعية الإضاءة والبيئة</label>
-            <div class="grid grid-cols-2 gap-2" id="hdri-grid">
-                <button onclick="setHdri('urban', this)" class="hdri-btn active-tab p-3 text-[10px] font-bold rounded-xl border border-gray-800 bg-[#161b22]">🏙️ نهار مدني</button>
-                <button onclick="setHdri('nature', this)" class="hdri-btn p-3 text-[10px] font-bold rounded-xl border border-gray-800 bg-[#161b22]">🌲 بيئة طبيعية</button>
-                <button onclick="setHdri('studio', this)" class="hdri-btn p-3 text-[10px] font-bold rounded-xl border border-gray-800 bg-[#161b22]">🏠 إضاءة استوديو</button>
-                <button onclick="setHdri('night', this)" class="hdri-btn p-3 text-[10px] font-bold rounded-xl border border-gray-800 bg-[#161b22]">🌙 مشهد ليلي</button>
+        <div class="space-y-3">
+            <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">⚙️ محرك الرندر (Engine)</label>
+            <div class="opt-grid">
+                <div class="btn-prop active" onclick="selectProp(this, 'engine')">V-Ray Realistic</div>
+                <div class="btn-prop" onclick="selectProp(this, 'engine')">Cinematic AI</div>
+                <div class="btn-prop" onclick="selectProp(this, 'engine')">Octane Style</div>
+                <div class="btn-prop" onclick="selectProp(this, 'engine')">Sketch Render</div>
             </div>
         </div>
 
-        <div class="bg-[#161b22] p-4 rounded-2xl border border-gray-800">
-            <label class="text-[11px] font-bold text-gray-500 block mb-3 uppercase">هامش التصرف الإبداعي</label>
-            <input type="range" class="w-full accent-blue-600 cursor-pointer" min="0" max="100" value="75">
-            <div class="flex justify-between text-[9px] mt-2 font-black italic">
-                <span class="text-blue-500">التزام دقيق</span>
-                <span class="text-gray-600">حرية إبداعية</span>
+        <div class="space-y-3">
+            <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🌍 وضعية الإضاءة (HDRI)</label>
+            <div class="opt-grid">
+                <div class="btn-prop active" onclick="selectProp(this, 'hdri')">🏙️ نهار مدني</div>
+                <div class="btn-prop" onclick="selectProp(this, 'hdri')">🌇 غروب ذهبي</div>
+                <div class="btn-prop" onclick="selectProp(this, 'hdri')">🌲 غابة طبيعية</div>
+                <div class="btn-prop" onclick="selectProp(this, 'hdri')">🌙 مشهد ليلي</div>
             </div>
         </div>
 
-        <div class="space-y-2">
-            <label class="text-[11px] font-bold text-gray-500 uppercase">أبعاد الرندر (Aspect Ratio)</label>
-            <div class="grid grid-cols-3 gap-2">
-                <button onclick="setRatio('ratio-1-1', this)" class="ratio-btn active-tab p-2 text-[10px] font-bold rounded-lg border border-gray-800 bg-[#05070a]">1:1</button>
-                <button onclick="setRatio('ratio-16-9', this)" class="ratio-btn p-2 text-[10px] font-bold rounded-lg border border-gray-800 bg-[#05070a]">16:9</button>
-                <button onclick="setRatio('ratio-4-3', this)" class="ratio-btn p-2 text-[10px] font-bold rounded-lg border border-gray-800 bg-[#05070a]">4:3</button>
+        <div class="space-y-3">
+            <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">📐 الأبعاد (Aspect Ratio)</label>
+            <div class="flex gap-2">
+                <button class="btn-prop flex-1 active" onclick="changeRatio('ratio-1-1', this)">1:1</button>
+                <button class="btn-prop flex-1" onclick="changeRatio('ratio-16-9', this)">16:9</button>
             </div>
         </div>
 
-        <button onclick="startRender()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black text-sm shadow-2xl active:scale-95 transition-all mt-auto mb-4">
-            توليد الرندر السحري
-        </button>
+        <div class="bg-[#161b22] p-5 rounded-xl border border-[#30363d]">
+            <label class="text-[10px] font-black text-gray-500 block mb-4">هامش التصرف الإبداعي</label>
+            <input type="range" class="w-full accent-blue-600" min="0" max="100" value="85">
+        </div>
+
+        <button onclick="runFinalRender()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-2xl font-black text-sm shadow-xl transition-all active:scale-95 mt-auto">بدء الرندر النهائي</button>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-4 lg:p-12 bg-[#010409]">
-        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-            
-            <div class="space-y-4">
-                <h3 class="text-[11px] font-black text-gray-600 uppercase tracking-widest">01. ارفع مشروعك</h3>
-                <div id="box1" class="canvas-container ratio-1-1 flex items-center justify-center cursor-pointer border-dashed border-gray-700 hover:border-blue-600 transition-all group" onclick="document.getElementById('fileIn').click()">
-                    <div id="uploadHint" class="text-center group-hover:scale-110 transition-transform">
-                        <div class="text-4xl mb-2 opacity-20">📁</div>
-                        <p class="text-[10px] font-black uppercase text-gray-600">Click to Upload Image</p>
-                    </div>
-                    <img id="imgSrc" class="hidden absolute inset-0 w-full h-full object-cover">
-                    <input type="file" id="fileIn" class="hidden" accept="image/*" onchange="previewFile(this)">
-                </div>
+    <main class="main-canvas">
+        
+        <div class="w-full flex flex-col items-center gap-3">
+            <div class="w-full max-w-[700px] flex justify-between px-4">
+                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">01. لقطة المشروع الأصلية</span>
+                <button id="changeBtn" class="hidden text-[10px] text-blue-500 font-bold hover:underline" onclick="document.getElementById('fileIn').click()">تبديل الصورة 🔄</button>
             </div>
-
-            <div class="space-y-4">
-                <h3 class="text-[11px] font-black text-gray-600 uppercase tracking-widest">02. الرندر المعالج</h3>
-                <div id="box2" class="canvas-container ratio-1-1 flex items-center justify-center border-gray-800 shadow-2xl bg-[#05070a]">
-                    <div id="loader">
-                        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                        <p class="text-[10px] font-black text-blue-500 tracking-[0.4em] animate-pulse">PROCESSING AI...</p>
+            <div id="frame1" class="render-frame ratio-1-1 flex items-center justify-center cursor-pointer group" onclick="document.getElementById('fileIn').click()">
+                <div id="hint1" class="text-center">
+                    <div class="w-16 h-16 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2" stroke-linecap="round"/></svg>
                     </div>
-                    <img id="imgRes" class="hidden absolute inset-0 w-full h-full object-cover">
-                    <div id="watermark" class="hidden absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-                        <p class="rotate-[-20deg] text-2xl lg:text-3xl font-black text-red-600 uppercase">www.avantgardbuildings.com</p>
-                    </div>
-                    <p id="resPlaceholder" class="text-[10px] font-black text-gray-900 uppercase">Output Window</p>
+                    <p class="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">انقر لرفع المشروع</p>
                 </div>
-                <button id="dlBtn" onclick="downloadResult()" class="hidden w-full bg-white text-black py-4 rounded-2xl font-black text-xs hover:bg-gray-200 shadow-xl transition-all">تحميل الرندر (4K HD)</button>
+                <img id="imgSrc" class="hidden absolute inset-0 w-full h-full object-cover">
+                <input type="file" id="fileIn" class="hidden" accept="image/*" onchange="handleFile(this)">
             </div>
         </div>
+
+        <div class="w-full flex flex-col items-center gap-3">
+            <span class="w-full max-w-[700px] px-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">02. الرندر المعالج (Google AI Engine)</span>
+            <div id="frame2" class="render-frame ratio-1-1">
+                <div id="loader" class="loader-overlay">
+                    <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p class="text-[10px] font-black text-blue-500 tracking-[0.4em] animate-pulse">GENERATING REALISM...</p>
+                </div>
+                <img id="imgRes" class="hidden absolute inset-0 w-full h-full object-cover">
+                <div class="watermark">AVANTGARD BUILDINGS</div>
+                <p id="hint2" class="text-[10px] font-black text-gray-800 uppercase tracking-[0.3em] flex items-center justify-center h-full">بانتظار الرندر...</p>
+            </div>
+            <button id="dlBtn" onclick="downloadImg()" class="hidden w-full max-w-[700px] bg-white text-black py-4 rounded-xl font-black text-xs hover:bg-gray-200 transition-all">تحميل الرندر بدقة 4K HD</button>
+        </div>
+
     </main>
 
     <script>
-        function setRatio(r, btn) {
-            document.getElementById('box1').className = `canvas-container ${r}`;
-            document.getElementById('box2').className = `canvas-container ${r}`;
-            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active-tab'));
-            btn.classList.add('active-tab');
+        // دالة اختيار الخصائص (تبديل الحالة النشطة)
+        function selectProp(btn, group) {
+            btn.parentElement.querySelectorAll('.btn-prop').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
 
-        function setHdri(id, btn) {
-            document.querySelectorAll('.hdri-btn').forEach(b => b.classList.remove('active-tab'));
-            btn.classList.add('active-tab');
+        // تغيير الأبعاد للمربعين معاً
+        function changeRatio(ratio, btn) {
+            document.getElementById('frame1').className = `render-frame ${ratio}`;
+            document.getElementById('frame2').className = `render-frame ${ratio}`;
+            btn.parentElement.querySelectorAll('.btn-prop').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
 
-        function previewFile(input) {
+        // معالجة رفع وتبديل الصورة
+        function handleFile(input) {
             const file = input.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('imgSrc');
-                    img.src = e.target.result;
-                    img.classList.remove('hidden');
-                    document.getElementById('uploadHint').classList.add('hidden');
-                    document.getElementById('box1').style.borderStyle = 'solid';
+                reader.onload = (e) => {
+                    document.getElementById('imgSrc').src = e.target.result;
+                    document.getElementById('imgSrc').classList.remove('hidden');
+                    document.getElementById('hint1').classList.add('hidden');
+                    document.getElementById('changeBtn').classList.remove('hidden');
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        function startRender() {
+        // تشغيل الرندر (محاكاة المحرك الأصلي)
+        function runFinalRender() {
             const src = document.getElementById('imgSrc').src;
-            if (!src) return alert("يرجى رفع المشروع أولاً في المربع 1");
+            if (!src) return alert("يرجى رفع لقطة المشروع أولاً");
 
             document.getElementById('loader').style.display = 'flex';
             document.getElementById('imgRes').classList.add('hidden');
             document.getElementById('dlBtn').classList.add('hidden');
-            document.getElementById('watermark').classList.add('hidden');
 
             setTimeout(() => {
                 document.getElementById('loader').style.display = 'none';
                 const res = document.getElementById('imgRes');
-                res.src = src; 
+                res.src = src; // هنا الربط بـ API غوغل ستوديو
                 res.classList.remove('hidden');
-                document.getElementById('watermark').classList.remove('hidden');
-                document.getElementById('resPlaceholder').classList.add('hidden');
+                document.getElementById('hint2').classList.add('hidden');
                 document.getElementById('dlBtn').classList.remove('hidden');
-                alert("تم توليد الرندر بناءً على الأوامر الذكية والإضاءة المختارة!");
+                alert("اكتمل الرندر بنجاح وفقاً للمعايير المختارة!");
             }, 4000);
         }
 
-        function downloadResult() {
-            const link = document.createElement('a');
-            link.download = 'Avantgard-AI-Render.png';
-            link.href = document.getElementById('imgRes').src;
-            link.click();
+        function downloadImg() {
+            const a = document.createElement('a');
+            a.href = document.getElementById('imgRes').src;
+            a.download = 'Avantgard-Render-Pro.png';
+            a.click();
         }
     </script>
 </body>
