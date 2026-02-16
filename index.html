@@ -1,38 +1,48 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SketchUp AI Renderer</title>
+    <title>AI Render Pro - معالجة الصور</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script> 
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-        }
-        .glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        body { background-color: #0f172a; color: white; font-family: sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.4",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.40.0"
-  }
-}
-</script>
 </head>
-<body>
-    <div id="root"></div>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+    <header class="text-center mb-10">
+        <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">AI Render Pro</h1>
+        <p class="text-gray-400">حول تصاميمك إلى واقع مذهل باستخدام الذكاء الاصطناعي</p>
+    </header>
+
+    <main class="glass p-8 rounded-3xl w-full max-w-2xl shadow-2xl">
+        <div class="border-2 border-dashed border-gray-600 rounded-2xl p-10 text-center mb-6" id="drop-zone">
+            <p class="text-lg text-gray-300">قم برفع الصورة للبدء</p>
+        </div>
+
+        <div id="payment-section" class="bg-blue-600/20 border border-blue-500/50 rounded-xl p-6 mb-6 text-center">
+            <p class="text-sm mb-4">هذا الاشتراك مطلوب لتفعيل المعالجة</p>
+            <div id="paypal-button-container"></div>
+        </div>
+
+        <button id="render-btn" disabled class="w-full bg-gray-600 py-4 rounded-xl font-bold opacity-50 cursor-not-allowed">
+            ابدأ المعالجة الآن
+        </button>
+    </main>
+
+    <script>
+        // تفعيل أزرار PayPal بشكل تجريبي
+        paypal.Buttons({
+            createOrder: (data, actions) => actions.order.create({ purchase_units: [{ amount: { value: '9.99' } }] }),
+            onApprove: (data, actions) => actions.order.capture().then(details => {
+                alert('تم الدفع بنجاح! تم تفعيل زر المعالجة.');
+                const btn = document.getElementById('render-btn');
+                btn.disabled = false;
+                btn.className = "w-full bg-blue-600 py-4 rounded-xl font-bold";
+            })
+        }).render('#paypal-button-container');
+    </script>
 </body>
 </html>
