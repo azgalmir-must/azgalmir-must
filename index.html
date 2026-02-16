@@ -3,128 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avantgard AI Suite | لوحة التحكم</title>
+    <title>V-Ray AI Suite | لوحة التحكم الاحترافية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background-color: #05070a; color: #e2e8f0; }
-        .sidebar { background: #0d1117; border-left: 1px solid #30363d; width: 320px; transition: all 0.3s; }
-        .control-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 15px; margin-bottom: 15px; cursor: pointer; }
-        .control-card:hover { border-color: #58a6ff; }
-        .active-option { border-color: #238636; background: rgba(35, 134, 54, 0.1); }
-        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-20deg); color: rgba(255, 0, 0, 0.3); font-size: 2.5rem; font-weight: bold; pointer-events: none; white-space: nowrap; z-index: 20; display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700&display=swap');
+        body { font-family: 'Tajawal', sans-serif; background-color: #0d1117; color: #e6edf3; margin: 0; overflow: hidden; }
+        .side-panel { background: #161b22; border-right: 1px solid #30363d; width: 380px; height: 100vh; overflow-y: auto; scrollbar-width: thin; }
+        .main-canvas { background: #010409; flex: 1; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; }
+        .control-item { background: #21262d; border: 1px solid #30363d; border-radius: 12px; transition: 0.2s; cursor: pointer; }
+        .control-item:hover { border-color: #8b949e; background: #30363d; }
+        .control-item.active { border-color: #2f81f7; background: rgba(56, 139, 253, 0.1); }
+        .section-title { font-size: 11px; color: #7d8590; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .watermark-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); color: rgba(255, 0, 0, 0.25); font-size: 3rem; font-weight: 900; pointer-events: none; z-index: 50; display: none; }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden">
+<body class="flex">
 
-    <aside class="sidebar h-full flex flex-col p-6 overflow-y-auto">
-        <div class="mb-10 text-center">
-            <h1 class="text-xl font-bold text-blue-500 tracking-tighter">AVANTGARD AI</h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Architectural Engine v1.0</p>
-        </div>
-
-        <div class="mb-6">
-            <h3 class="text-sm text-gray-400 mb-4 border-b border-gray-800 pb-2">إعدادات المشهد</h3>
-            
-            <label class="text-xs text-gray-500 mb-2 block">نمط الإضاءة</label>
-            <div class="grid grid-cols-2 gap-2 mb-4">
-                <div class="control-card text-[11px] text-center active-option" onclick="selectOption(this)">نهار مشمس</div>
-                <div class="control-card text-[11px] text-center" onclick="selectOption(this)">غروب دافئ</div>
+    <main class="main-canvas relative">
+        <div id="drop-zone" class="w-full max-w-4xl h-[85vh] border-2 border-dashed border-[#30363d] rounded-[2.5rem] flex flex-col items-center justify-center relative bg-[#0d1117] group overflow-hidden">
+            <input type="file" id="file-input" class="hidden" accept="image/*">
+            <div id="upload-ui" class="text-center z-10">
+                <div class="w-20 h-20 bg-[#161b22] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-[#21262d] transition-all">
+                    <svg class="w-10 h-10 text-[#2f81f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">رفع لقطة سكيتش-آب</h2>
+                <p class="text-gray-500 text-sm">قم برفع صورة للمشروع للبدء بعملية الرندر الفائق الواقعية</p>
+                <button class="mt-6 bg-[#2f81f7] hover:bg-[#4ea5ff] text-white px-10 py-3 rounded-full font-bold shadow-lg" onclick="document.getElementById('file-input').click()">تصفح الملفات</button>
             </div>
-
-            <label class="text-xs text-gray-500 mb-2 block">دقة الإخراج</label>
-            <select id="quality" class="w-full bg-black border border-gray-700 rounded-lg p-2 text-xs mb-4">
-                <option value="free">Standard (720p) - مجاني</option>
-                <option value="pro">Ultra HD (4K) - Pro</option>
-            </select>
-        </div>
-
-        <div id="pro-unlock" class="mt-auto bg-gradient-to-b from-blue-900/20 to-transparent p-4 rounded-2xl border border-blue-500/20">
-            <p class="text-[11px] text-blue-300 mb-3 text-center">احصل على رندر بدون علامة مائية وبدقة 4K</p>
-            <div id="paypal-button-container"></div>
-        </div>
-    </aside>
-
-    <main class="flex-1 relative flex flex-col bg-[#010409]">
-        <header class="h-16 border-b border-gray-800 flex items-center justify-between px-8">
-            <div class="text-xs text-gray-400">مشروع جديد: <span class="text-white">Untitled_Render_01</span></div>
-            <button onclick="processRender()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-full text-xs font-bold transition-all shadow-lg shadow-blue-900/20">
-                بدء الرندر النهائي
-            </button>
-        </header>
-
-        <div class="flex-1 p-10 flex items-center justify-center overflow-hidden">
-            <div id="drop-zone" class="relative w-full h-full max-w-4xl border-2 border-dashed border-gray-800 rounded-[2rem] flex items-center justify-center bg-[#0d1117] transition-all hover:border-blue-500/50 group">
-                <input type="file" id="image-upload" class="hidden" accept="image/*">
-                
-                <div id="upload-prompt" class="text-center group-hover:scale-105 transition-transform">
-                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2" stroke-linecap="round"/></svg>
-                    </div>
-                    <p class="text-gray-400 text-sm">اسحب لقطة السكيتش-آب هنا</p>
-                    <button class="text-blue-500 text-xs mt-2 underline" onclick="document.getElementById('image-upload').click()">أو تصفح الملفات</button>
+            
+            <img id="preview-image" class="absolute inset-0 w-full h-full object-contain hidden z-20">
+            <div id="wm" class="watermark-overlay">www.avantgardbuildings.com</div>
+            
+            <div id="render-screen" class="absolute inset-0 bg-black/90 z-40 hidden flex flex-col items-center justify-center">
+                <div class="w-64 h-1 bg-gray-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-[#2f81f7] animate-[progress_4s_linear]"></div>
                 </div>
-
-                <img id="main-preview" class="absolute inset-0 w-full h-full object-contain hidden z-10">
-                
-                <div id="wm" class="watermark">www.avantgardbuildings.com</div>
-                
-                <div id="loader" class="absolute inset-0 bg-black/80 z-30 flex items-center justify-center hidden">
-                    <div class="text-center">
-                        <div class="inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                        <p class="text-xs text-blue-400 tracking-widest">AI RENDERING IN PROGRESS...</p>
-                    </div>
-                </div>
+                <p class="mt-6 text-xs tracking-[0.4em] text-[#2f81f7]">V-RAY AI ENGINE PROCESSING...</p>
             </div>
         </div>
     </main>
 
+    <aside class="side-panel p-6">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-lg font-bold">V-Ray AI Suite</h1>
+                <p class="text-[9px] text-[#7d8590] tracking-widest uppercase font-bold">Architectural Pro Engine</p>
+            </div>
+            <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold">V</div>
+        </div>
+
+        <div class="mb-6">
+            <div class="section-title"><span>□</span> توجيهات الذكاء الاصطناعي (PROMPT)</div>
+            <textarea class="w-full bg-[#010409] border border-[#30363d] rounded-xl p-3 text-xs h-24 placeholder-[#484f58]" placeholder="اكتب تعليماتك هنا... مثال: إضافة مسبح، إجعل الواجهة خشبية"></textarea>
+        </div>
+
+        <div class="mb-6">
+            <div class="section-title"><span>●</span> أوضاع الإضاءة</div>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="control-item p-3 text-center text-[10px] active" onclick="activate(this)">☀️ ضوء طبيعي</div>
+                <div class="control-item p-3 text-center text-[10px]" onclick="activate(this)">💡 إضاءة استوديو</div>
+                <div class="control-item p-3 text-center text-[10px]" onclick="activate(this)">🌙 لقطة ليلية</div>
+                <div class="control-item p-3 text-center text-[10px]" onclick="activate(this)">🌆 غروب دافئ</div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <div class="section-title"><span>▣</span> الأبعاد (ASPECT RATIO)</div>
+            <div class="flex gap-2">
+                <div class="control-item flex-1 p-2 text-center text-[9px] active">1:1</div>
+                <div class="control-item flex-1 p-2 text-center text-[9px]">4:3</div>
+                <div class="control-item flex-1 p-2 text-center text-[9px]">16:9</div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <div class="section-title"><span>★</span> الدقة النهائية</div>
+            <div class="space-y-2">
+                <div class="control-item p-3 text-[10px] flex justify-between px-4 items-center" onclick="activate(this)">
+                    <span>1K Standard</span>
+                    <span class="text-green-500">FREE</span>
+                </div>
+                <div class="control-item p-3 text-[10px] flex justify-between px-4 items-center" onclick="activate(this)">
+                    <span>4K Ultra HD</span>
+                    <span class="text-blue-500 font-bold">PRO</span>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="startFinalRender()" class="w-full bg-[#238636] hover:bg-[#2ea043] text-white py-4 rounded-xl font-bold text-sm shadow-lg mb-6 transition-all active:scale-95">
+            بدء الرندر الاحترافي
+        </button>
+
+        <div class="bg-[#1c2128] border border-[#30363d] rounded-2xl p-4">
+            <p class="text-[10px] text-center mb-4 text-[#7d8590]">قم بالترقية لإزالة العلامة المائية</p>
+            <div id="paypal-button-container"></div>
+        </div>
+    </aside>
+
     <script>
-        // وظائف لوحة التحكم
-        function selectOption(el) {
-            el.parentElement.querySelectorAll('.control-card').forEach(c => c.classList.remove('active-option'));
-            el.classList.add('active-option');
+        function activate(el) {
+            el.parentElement.querySelectorAll('.control-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
         }
 
-        const uploadInput = document.getElementById('image-upload');
-        const preview = document.getElementById('main-preview');
-        const prompt = document.getElementById('upload-prompt');
-        const loader = document.getElementById('loader');
-        const watermark = document.getElementById('wm');
+        const input = document.getElementById('file-input');
+        const preview = document.getElementById('preview-image');
+        const ui = document.getElementById('upload-ui');
+        const wm = document.getElementById('wm');
+        const loader = document.getElementById('render-screen');
 
-        uploadInput.onchange = (e) => {
+        input.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (re) => {
                     preview.src = re.target.result;
                     preview.classList.remove('hidden');
-                    prompt.classList.add('hidden');
+                    ui.classList.add('hidden');
                 }
                 reader.readAsDataURL(file);
             }
-        };
+        }
 
-        function processRender() {
-            if (!preview.src) { alert("ارفع صورة أولاً!"); return; }
+        function startFinalRender() {
+            if(!preview.src) return alert("يرجى اختيار صورة أولاً");
             loader.classList.remove('hidden');
             setTimeout(() => {
                 loader.classList.add('hidden');
-                watermark.style.display = 'block';
-                alert("اكتمل الرندر المجاني! تم تطبيق العلامة المائية.");
-            }, 3000);
+                wm.style.display = 'block';
+                alert("اكتملت المعالجة (بنسخة العلامة المائية)");
+            }, 4000);
         }
 
-        // دفع PayPal
         paypal.Buttons({
-            createOrder: (data, actions) => actions.order.create({ purchase_units: [{ amount: { value: '9.99' } }] }),
-            onApprove: (data, actions) => actions.order.capture().then(det => {
-                watermark.style.display = 'none';
-                document.getElementById('pro-unlock').innerHTML = "<p class='text-green-500 text-center font-bold'>✓ تم تفعيل النسخة الاحترافية</p>";
-                alert("شكراً لك! تم إزالة العلامة المائية وفتح دقة 4K.");
+            onApprove: (data, actions) => actions.order.capture().then(() => {
+                wm.style.display = 'none';
+                alert("تمت إزالة العلامة المائية بنجاح!");
             })
         }).render('#paypal-button-container');
     </script>
+    <style>@keyframes progress { from { width: 0%; } to { width: 100%; } }</style>
 </body>
 </html>
