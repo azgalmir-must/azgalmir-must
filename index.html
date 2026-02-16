@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
 
-const HDRI_ENVIRONMENTS = [
-  { id: 'urban', label: '🏙️ نهار', prompt: 'urban city center' },
-  { id: 'forest', label: '🌲 طبيعة', prompt: 'forest surroundings' },
-  { id: 'interior', label: '🏠 داخلي', prompt: 'modern interior' },
-  { id: 'sunset', label: '🌇 غروب', prompt: 'sunset lighting' },
+// الإعدادات الثابتة للبيئة والأبعاد
+const LIGHTING_MODES = [
+  { id: 'urban', label: '🏙️ نهار مدني' },
+  { id: 'nature', label: '🌲 بيئة طبيعية' },
+  { id: 'studio', label: '🏠 إضاءة استوديو' },
+  { id: 'night', label: '🌙 مشهد ليلي' },
 ];
 
 const ASPECT_RATIOS = {
@@ -13,96 +14,101 @@ const ASPECT_RATIOS = {
   '4:3': 'aspect-[4/3]'
 };
 
-export default function AvantgardApp() {
-  const [sourceImage, setSourceImage] = useState<string | null>(null);
-  const [renderedImage, setRenderedImage] = useState<string | null>(null);
-  const [isRendering, setIsRendering] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+type RatioKey = keyof typeof ASPECT_RATIOS;
 
-  const [settings, setSettings] = useState({
-    prompt: '', 
-    hdri: 'urban',
-    ratio: '1:1' as keyof typeof ASPECT_RATIOS,
-    creativity: 75
+export default function AvantgardFinalApp() {
+  const [source, setSource] = useState<string | null>(null);
+  const [output, setOutput] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  const [params, setParams] = useState({
+    smartPrompt: '',
+    lighting: 'urban',
+    ratio: '1:1' as RatioKey,
+    creativity: 80
   });
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (en) => setSourceImage(en.target?.result as string);
+      reader.onload = (ev) => setSource(ev.target?.result as string);
       reader.readAsDataURL(file);
     }
   };
 
-  const startRender = () => {
-    if (!sourceImage) return alert("ارفع مشروعك أولاً");
-    setIsRendering(true);
+  const handleRender = () => {
+    if (!source) return alert("يرجى رفع صورة المشروع أولاً");
+    setIsLoading(true);
+    // محاكاة الاتصال المباشر بـ Google AI Studio
     setTimeout(() => {
-      setRenderedImage(sourceImage);
-      setIsRendering(false);
-    }, 4000);
+      setOutput(source); 
+      setIsLoading(false);
+    }, 3800);
   };
 
   return (
-    // التعديل: lg:flex-row تعني في الشاشات الكبيرة يكون جنباً إلى جنب، وفي الهاتف flex-col (رأسي)
-    <div className="flex flex-col lg:flex-row h-screen bg-[#05070a] text-gray-300 overflow-hidden dir-rtl" dir="rtl">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-[#05070a] text-gray-200" dir="rtl">
       
-      {/* القائمة الجانبية: تتكيف مع الهاتف لتصبح في الأسفل أو تختفي خلف زر */}
-      <aside className="w-full lg:w-[380px] h-auto lg:h-screen border-b lg:border-l border-gray-800 bg-[#0d1117] p-5 flex flex-col gap-4 overflow-y-auto z-20">
-        <div className="text-center pb-4 border-b border-gray-800">
-          <h1 className="text-xl lg:text-2xl font-black text-white italic tracking-tighter uppercase">AVANTGARD AI</h1>
-          <p className="text-[8px] lg:text-[9px] text-blue-500 font-bold tracking-[0.3em]">MOBILE & DESKTOP READY</p>
+      {/* الجانب الأيمن: لوحة التحكم المباشرة */}
+      <aside className="w-full lg:w-[390px] bg-[#0d1117] border-b lg:border-l border-gray-800 p-6 flex flex-col gap-6 overflow-y-auto lg:h-screen">
+        <div className="text-center border-b border-gray-800 pb-5">
+          <h1 className="text-2xl font-black text-white italic tracking-tighter">AVANTGARD AI</h1>
+          <p className="text-[9px] text-blue-500 font-bold tracking-[0.3em] uppercase mt-1">Professional Architecture Engine</p>
         </div>
 
-        {/* أوامر الذكاء الاصطناعي */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-gray-500 uppercase">🪄 أوامر التعديل الذكي</label>
+        {/* نافذة الأوامر الذكية (Smart Edit) */}
+        <div className="space-y-2">
+          <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">🪄 أوامر التعديل الذكي</label>
           <textarea 
-            value={settings.prompt}
-            onChange={(e) => setSettings({...settings, prompt: e.target.value})}
-            placeholder="مثال: أضف أثاثاً مودرن..."
-            className="w-full h-20 lg:h-28 bg-[#05070a] border border-gray-800 rounded-xl p-3 text-xs focus:border-blue-500 outline-none transition-all"
+            value={params.smartPrompt}
+            onChange={(e) => setParams({...params, smartPrompt: e.target.value})}
+            placeholder="اكتب تعليماتك هنا قبل الرندر... (مثلاً: أضف زجاجاً عاكساً، غير لون الواجهة)"
+            className="w-full h-32 bg-[#05070a] border border-gray-800 rounded-2xl p-4 text-xs focus:border-blue-500 outline-none transition-all placeholder:text-gray-700"
           />
         </div>
 
-        {/* الإضاءة - تحسين العرض في الهاتف */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-gray-500 uppercase">وضعية الإضاءة</label>
-          <div className="grid grid-cols-2 lg:grid-cols-2 gap-2">
-            {HDRI_ENVIRONMENTS.map((env) => (
+        {/* وضعية الإضاءة HDRI */}
+        <div className="space-y-2">
+          <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">وضعية الإضاءة (HDRI)</label>
+          <div className="grid grid-cols-2 gap-2">
+            {LIGHTING_MODES.map((m) => (
               <button
-                key={env.id}
-                onClick={() => setSettings({...settings, hdri: env.id})}
-                className={`p-2 lg:p-3 text-[10px] font-bold rounded-xl border transition-all ${settings.hdri === env.id ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-gray-800 bg-[#161b22] text-gray-500'}`}
+                key={m.id}
+                onClick={() => setParams({...params, lighting: m.id})}
+                className={`p-3 text-[10px] font-bold rounded-xl border transition-all ${params.lighting === m.id ? 'border-blue-600 bg-blue-600/10 text-white shadow-lg' : 'border-gray-800 bg-[#161b22] text-gray-500'}`}
               >
-                {env.label}
+                {m.label}
               </button>
             ))}
           </div>
         </div>
 
         {/* هامش الإبداع */}
-        <div className="p-3 bg-[#161b22] rounded-xl border border-gray-800">
-          <label className="text-[10px] font-bold text-gray-500 block mb-2 uppercase">هامش الإبداع</label>
+        <div className="bg-[#161b22] p-4 rounded-2xl border border-gray-800">
+          <label className="text-[11px] font-bold text-gray-500 block mb-3 uppercase tracking-wider">هامش التصرف الإبداعي</label>
           <input 
             type="range" 
-            min="0" max="100"
-            value={settings.creativity}
-            onChange={(e) => setSettings({...settings, creativity: parseInt(e.target.value)})}
-            className="w-full accent-blue-600 cursor-pointer" 
+            className="w-full accent-blue-600"
+            value={params.creativity}
+            onChange={(e) => setParams({...params, creativity: parseInt(e.target.value)})}
           />
+          <div className="flex justify-between text-[9px] mt-2 font-black italic">
+            <span className="text-blue-500">التزام دقيق</span>
+            <span className="text-gray-600">خيال حر</span>
+          </div>
         </div>
 
-        {/* الأبعاد */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-gray-500 uppercase">أبعاد الصورة</label>
+        {/* أبعاد الصورة */}
+        <div className="space-y-2">
+          <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">أبعاد الرندر</label>
           <div className="grid grid-cols-3 gap-2">
-            {(Object.keys(ASPECT_RATIOS) as Array<keyof typeof ASPECT_RATIOS>).map((r) => (
+            {(Object.keys(ASPECT_RATIOS) as RatioKey[]).map((r) => (
               <button
                 key={r}
-                onClick={() => setSettings({...settings, ratio: r})}
-                className={`p-2 text-[10px] font-bold rounded-lg border ${settings.ratio === r ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-gray-800 bg-[#161b22]'}`}
+                onClick={() => setParams({...params, ratio: r})}
+                className={`p-2 text-[10px] font-bold rounded-lg border transition-all ${params.ratio === r ? 'border-blue-600 bg-blue-600/20 text-white' : 'border-gray-800 bg-[#05070a]'}`}
               >
                 {r}
               </button>
@@ -111,65 +117,70 @@ export default function AvantgardApp() {
         </div>
 
         <button 
-          onClick={startRender}
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black text-xs shadow-xl active:scale-95 transition-all mt-2"
+          onClick={handleRender}
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black text-sm shadow-2xl active:scale-95 transition-all mt-auto mb-4"
         >
-          بدء الرندر
+          توليد الرندر النهائي
         </button>
       </aside>
 
-      {/* منطقة العمل: تتكيف لتصبح تحت بعضها في الهاتف */}
-      <main className="flex-1 overflow-y-auto p-4 lg:p-10">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+      {/* منطقة العرض الرئيسية: نظام المربعين */}
+      <main className="flex-1 overflow-y-auto p-4 lg:p-12 bg-[#010409]">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
           
-          {/* المربع 1: الرفع */}
-          <div className="flex flex-col gap-2">
-            <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">1. ارفع مشروعك</h3>
+          {/* المربع 1: استقبال المشروع */}
+          <div className="space-y-4">
+            <h3 className="text-[11px] font-black text-gray-600 uppercase tracking-[0.4em]">01. SOURCE PROJECT</h3>
             <div 
-              onClick={() => fileInputRef.current?.click()}
-              className={`relative rounded-3xl lg:rounded-[3rem] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all duration-500 ${ASPECT_RATIOS[settings.ratio]} ${sourceImage ? 'border-blue-500 border-solid' : 'border-gray-800 bg-[#0d1117] cursor-pointer'}`}
+              onClick={() => fileInput.current?.click()}
+              className={`relative rounded-[2.5rem] lg:rounded-[3.5rem] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all duration-700 ${ASPECT_RATIOS[params.ratio]} ${source ? 'border-blue-600 border-solid bg-black shadow-2xl scale-[1.02]' : 'border-gray-800 bg-[#0d1117] hover:border-blue-900 cursor-pointer shadow-inner'}`}
             >
-              {!sourceImage ? (
-                <div className="text-center p-4">
-                  <p className="text-[10px] font-black text-gray-600 uppercase">اضغط لرفع الصورة</p>
+              {!source ? (
+                <div className="text-center group p-8">
+                  <div className="w-16 h-16 bg-blue-600/5 rounded-full flex items-center justify-center mx-auto mb-4 transition-transform group-hover:scale-110">
+                    <svg className="w-8 h-8 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="2" stroke-linecap="round"/></svg>
+                  </div>
+                  <p className="text-[10px] font-black text-gray-700 uppercase tracking-widest">Tap to Upload</p>
                 </div>
               ) : (
-                <img src={sourceImage} className="absolute inset-0 w-full h-full object-cover" alt="Source" />
+                <img src={source} className="absolute inset-0 w-full h-full object-cover" alt="Source" />
               )}
-              <input ref={fileInputRef} type="file" hidden onChange={handleFileUpload} />
+              <input ref={fileInput} type="file" hidden onChange={onSelectFile} />
             </div>
           </div>
 
-          {/* المربع 2: الرندر */}
-          <div className="flex flex-col gap-2">
-            <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">2. الرندر النهائي</h3>
-            <div className={`relative rounded-3xl lg:rounded-[3rem] border-2 border-gray-800 bg-[#0d1117] overflow-hidden flex items-center justify-center transition-all duration-500 ${ASPECT_RATIOS[settings.ratio]}`}>
-              {isRendering && (
-                <div className="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center">
-                  <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="text-[9px] font-black text-blue-500 tracking-[0.2em]">PROCESSING...</p>
+          {/* المربع 2: الرندر الذكي */}
+          <div className="space-y-4">
+            <h3 className="text-[11px] font-black text-gray-600 uppercase tracking-[0.4em]">02. AI RENDERED OUTPUT</h3>
+            <div className={`relative rounded-[2.5rem] lg:rounded-[3.5rem] border-2 border-gray-800 bg-[#0d1117] overflow-hidden flex items-center justify-center transition-all duration-700 ${ASPECT_RATIOS[params.ratio]} shadow-2xl`}>
+              {isLoading && (
+                <div className="absolute inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-8 text-center">
+                  <div className="w-14 h-14 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
+                  <p className="text-[10px] font-black text-blue-500 tracking-[0.5em] animate-pulse uppercase">Gemini AI: Processing Realism...</p>
                 </div>
               )}
               
-              {renderedImage ? (
+              {output ? (
                 <>
-                  <img src={renderedImage} className="absolute inset-0 w-full h-full object-cover" alt="Rendered" />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-                    <p className="text-xs font-black text-red-600 rotate-[-15deg]">AVANTGARD WATERMARK</p>
+                  <img src={output} className="absolute inset-0 w-full h-full object-cover" alt="Output" />
+                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-10 select-none">
+                    <p className="rotate-[-25deg] text-3xl font-black text-red-600 uppercase">Avantgard Buildings</p>
                   </div>
                 </>
               ) : (
-                <p className="text-[10px] text-gray-800 font-bold uppercase tracking-widest">Output Window</p>
+                <div className="text-center opacity-5 tracking-[0.6em] text-[12px] font-black uppercase">
+                  Rendering Window
+                </div>
               )}
             </div>
 
-            {renderedImage && !isRendering && (
+            {output && !isLoading && (
               <a 
-                href={renderedImage} 
-                download="render.png"
-                className="w-full bg-white text-black text-center py-3 rounded-xl font-black text-xs hover:bg-gray-200 mt-2 transition-all"
+                href={output} 
+                download="Avantgard-Pro-Render.png"
+                className="w-full block bg-white text-black text-center py-5 rounded-[2rem] font-black text-xs hover:bg-gray-200 transition-all shadow-xl active:scale-95"
               >
-                تحميل الصورة
+                تحميل الصورة بدقة 4K
               </a>
             )}
           </div>
